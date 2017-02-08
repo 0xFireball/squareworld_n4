@@ -1,10 +1,10 @@
 package;
 
-import n4.NGameFrame;
+import n4.NGame;
 
 class Main {
 	public static function main() {
-		NGameFrame.init("shapes2", 640, 480, PlayState);
+		NGame.init("shapes2", 1024, 768, PlayState);
 		// System.init({title: "Project", width: 1024, height: 768}, function () {
 		// 	new Project();
 		// });
