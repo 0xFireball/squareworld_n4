@@ -1,6 +1,5 @@
 package;
 
-import kha.System;
 import n4.NGameFrame;
 
 class Main {
