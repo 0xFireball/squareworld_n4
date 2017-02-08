@@ -1,11 +1,13 @@
 package;
 
 import kha.System;
+import n4.NGameFrame;
 
 class Main {
 	public static function main() {
-		System.init({title: "Project", width: 1024, height: 768}, function () {
-			new Project();
-		});
+		NGameFrame.init("shapes2", 640, 480);
+		// System.init({title: "Project", width: 1024, height: 768}, function () {
+		// 	new Project();
+		// });
 	}
 }
