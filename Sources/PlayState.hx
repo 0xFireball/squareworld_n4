@@ -32,7 +32,7 @@ class PlayState extends NState {
 		_bullets = new NTypedGroup<Bullet>();
 		add(_bullets);
 
-		emitter = new NSquareParticleEmitter();
+		emitter = new NSquareParticleEmitter(100);
 		add(emitter);
 
 		super.create();
@@ -40,6 +40,11 @@ class PlayState extends NState {
 
 	override public function update(dt:Float) {
 		super.update(dt);
+
+		if (player.x < 0) player.x = 0;
+		if (player.x > NGame.width - player.width) player.x = NGame.width - player.width;
+		if (player.y < 0) player.y = 0;
+		if (player.y > NGame.height - player.height) player.y = NGame.height - player.height;
 
 		_bullets.forEachActive(function (bullet) {
 			if (bullet.x < 0 || bullet.x > NGame.width || bullet.y < 0 || bullet.y > NGame.height) {
@@ -51,16 +56,6 @@ class PlayState extends NState {
 			turretFire();
 			shotTimer = 0.2;
 		}
-
-		// shooting particles
-		// ++_frameCount;
-		// if (_frameCount % 12 == 0) {
-		// 	for (i in 0...20) {
-		// 		emitter.emit(_turret.x + _turret.width / 2, _turret.y + _turret.height / 2, 6,
-		// 			emitter.velocitySpread(45),
-		// 			NColorUtil.randCol(0.5, 0.5, 0.5), 0.6);
-		// 	}
-		// }
 	}
 
 	function turretFire() {
@@ -78,7 +73,7 @@ class PlayState extends NState {
 		 _bullets.add(bullet);
 		 for (i in 0...19) {
 			 emitter.emit(x, y, 6,
-					NSquareParticleEmitter.velocitySpread(45, dx/4, dy/4),
+					NSquareParticleEmitter.velocitySpread(45, dx / 4, dy / 4),
 					NColorUtil.randCol(0.5, 0.5, 0.5), 0.6);
 		 }
 	 }
