@@ -71,6 +71,14 @@ class PlayState extends NState {
 		 bullet.velocity.x = dx;
 		 bullet.velocity.y = dy;
 		 _bullets.add(bullet);
+		 var recoilSpeed = bullet.momentum / _turret.mass;
+		 var recoilMotion = new FastVector2(bullet.velocity.x, bullet.velocity.y);
+		 recoilMotion.normalize();
+		 var recoilVelocity = recoilMotion.mult(-recoilSpeed);
+		 _turret.velocity.x += recoilVelocity.x;
+		 _turret.velocity.y += recoilVelocity.y;
+		 _turret.x = _turret.x % NGame.width;
+		 _turret.y = _turret.y % NGame.height;
 		 for (i in 0...19) {
 			 emitter.emit(x, y, 6,
 					NSquareParticleEmitter.velocitySpread(45, dx / 4, dy / 4),
