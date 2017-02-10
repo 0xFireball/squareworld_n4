@@ -1,10 +1,10 @@
 package;
 
 import kha.Color;
-import kha.math.*;
 import n4.NState;
 import n4.effects.particles.NSquareParticleEmitter;
 import n4.group.NTypedGroup;
+import n4.math.*;
 import n4.NGame;
 import n4.util.NColorUtil;
 import sprites.*;
@@ -120,9 +120,8 @@ class PlayState extends NState {
 		 bullet.velocity.y = dy;
 		 _bullets.add(bullet);
 		 var recoilSpeed = bullet.momentum / _turret.mass;
-		 var recoilMotion = new FastVector2(bullet.velocity.x, bullet.velocity.y);
-		 recoilMotion.normalize();
-		 var recoilVelocity = recoilMotion.mult(-recoilSpeed);
+		 var recoilMotion = new NVector(bullet.velocity.x, bullet.velocity.y);
+		 var recoilVelocity = recoilMotion.normalize().scale(-recoilSpeed);
 		 _turret.velocity.x += recoilVelocity.x;
 		 _turret.velocity.y += recoilVelocity.y;
 		 if (_turret.x > NGame.width) _turret.x = _turret.x % NGame.width;

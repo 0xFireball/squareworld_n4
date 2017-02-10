@@ -3,8 +3,8 @@ package sprites;
 import kha.Color;
 import kha.input.Keyboard;
 import kha.Key;
-import kha.math.FastVector2;
 import n4.entities.NSprite;
+import n4.math.NPoint;
 import n4.NGame;
 
 class Player extends NSprite {
@@ -15,8 +15,8 @@ class Player extends NSprite {
 		super(X, Y);
 
 		makeGraphic(20, 20, Color.Blue);
-		drag = new FastVector2(280, 280);
-		maxVelocity = new FastVector2(120, 120);
+		drag = new NPoint(280, 280);
+		maxVelocity = new NPoint(120, 120);
 	}
 
 	private function movement() {
