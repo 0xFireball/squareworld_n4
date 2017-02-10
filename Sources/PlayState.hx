@@ -41,6 +41,8 @@ class PlayState extends NState {
 	override public function update(dt:Float) {
 		super.update(dt);
 
+		NGame.overlap(_bullets, player, bulletHitPlayer);
+
 		if (player.x < 0) player.x = 0;
 		if (player.x > NGame.width - player.width) player.x = NGame.width - player.width;
 		if (player.y < 0) player.y = 0;
@@ -55,6 +57,30 @@ class PlayState extends NState {
 		if ((shotTimer -= dt) <= 0) {
 			turretFire();
 			shotTimer = 0.2;
+		}
+	}
+
+	static function bulletHitPlayer(b:Bullet, p:Player) {
+		// hit player
+		p.x = (Math.random() * 0.8 + 0.1) * NGame.width;
+		p.y = (Math.random() * 0.8 + 0.1) * NGame.height;
+		for (i in 0...15) {
+			Registry.PS.emitter
+				.emit(b.x, b.y, 9, NSquareParticleEmitter.velocitySpread(100, 
+						p.velocity.x / 2,
+						p.velocity.y / 2),
+					NColorUtil.randCol(0.3, 0.3, 0.3),
+					0.8
+				);
+		}
+		for (i in 0...9) {
+			Registry.PS.emitter
+				.emit(b.x, b.y, 9, NSquareParticleEmitter.velocitySpread(75, 
+						p.velocity.x / 2,
+						p.velocity.y / 2),
+					NColorUtil.randCol(1, 0.1, 0),
+					0.8
+				);
 		}
 	}
 
