@@ -10,7 +10,7 @@ class Bullet extends NSprite {
 	public function new(?X:Float = 0, ?Y:Float = 0) {
 		super(X, Y);
 
-		mass = 2;
+		mass = 1.5;
 		makeGraphic(8, 8, Color.fromValue(0xFF000000));
 	}
 
