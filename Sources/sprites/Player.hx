@@ -35,25 +35,44 @@ class Player extends NSprite {
 			_up = _down = false;
 		if (_left && _right)
 			_left = _right = false;
+		var mA = 0; // movement angle
 		if (_left || _right || _up || _down)
 		{
 			if (_up)
 			{
-				velocity.y -= speed;
+				mA = -90;
+				if (_left)
+				{
+					mA -= 45;
+				}
+				if (_right)
+				{
+					mA += 45;
+				}
 			}
-			if (_down)
+			else if (_down)
 			{
-				velocity.y += speed;
+				mA = 90;
+				if (_left)
+				{
+					mA += 45;
+				}
+				if (_right)
+				{
+					mA -= 45;
+				}
 			}
-			if (_left)
+			else if (_left)
 			{
-				velocity.x -= speed;
+				mA = 180;
 			}
-			if (_right)
+			else if (_right)
 			{
-				velocity.x += speed;
+				mA = 0;
 			}
 		}
+		var movementVel = new NPoint(speed, 0);
+		velocity.addPoint(movementVel.rotate(new NPoint(0, 0), mA));
 	}
 
 	override public function update(dt:Float) {
