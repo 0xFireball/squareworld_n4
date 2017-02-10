@@ -370,17 +370,15 @@ PlayState.prototype = $extend(n4_NState.prototype,{
 	}
 	,shoot: function(x,y,dx,dy) {
 		var bullet = new sprites_Bullet(x,y);
-		bullet.velocity.x = dx;
-		bullet.velocity.y = dy;
+		bullet.velocity.set_x(dx);
+		bullet.velocity.set_y(dy);
 		this._bullets.add(bullet);
 		var recoilSpeed = bullet.get_momentum() / this._turret.mass;
-		var recoilMotion = new kha_math_FastVector2(bullet.velocity.x,bullet.velocity.y);
-		recoilMotion.set_length(1);
-		var value = -recoilSpeed;
-		var x1 = recoilMotion.x * value;
-		var y1 = recoilMotion.y * value;
-		this._turret.velocity.x += x1;
-		this._turret.velocity.y += y1;
+		var recoilVelocity = new n4_math_NVector(bullet.velocity.x,bullet.velocity.y).normalize().scale(-recoilSpeed);
+		var _g = this._turret.velocity;
+		_g.set_x(_g.x + recoilVelocity.x);
+		var _g1 = this._turret.velocity;
+		_g1.set_y(_g1.y + recoilVelocity.y);
 		if(this._turret.x > n4_NGame.width) {
 			this._turret.set_x(this._turret.x % n4_NGame.width);
 		}
@@ -388,16 +386,16 @@ PlayState.prototype = $extend(n4_NState.prototype,{
 			this._turret.set_y(this._turret.y % n4_NGame.height);
 		}
 		if(this._turret.x < 0) {
-			var _g = this._turret;
-			_g.set_x(_g.x + n4_NGame.width);
+			var _g2 = this._turret;
+			_g2.set_x(_g2.x + n4_NGame.width);
 		}
 		if(this._turret.y < 0) {
-			var _g1 = this._turret;
-			_g1.set_y(_g1.y + n4_NGame.height);
+			var _g3 = this._turret;
+			_g3.set_y(_g3.y + n4_NGame.height);
 		}
-		var _g2 = 0;
-		while(_g2 < 19) {
-			++_g2;
+		var _g4 = 0;
+		while(_g4 < 19) {
+			++_g4;
 			this.emitter.emit(x,y,6,n4_effects_particles_NSquareParticleEmitter.velocitySpread(45,dx / 4,dy / 4),n4_util_NColorUtil.randCol(0.5,0.5,0.5),0.6);
 		}
 	}
@@ -3327,18 +3325,18 @@ var kha_Shaders = function() { };
 $hxClasses["kha.Shaders"] = kha_Shaders;
 kha_Shaders.__name__ = true;
 kha_Shaders.init = function() {
-	var data = Reflect.field(kha_Shaders,"painter_colored_fragData");
+	var data = Reflect.field(kha_Shaders,"painter_image_fragData");
 	var bytes = haxe_Unserializer.run(data);
-	kha_Shaders.painter_colored_frag = new kha_graphics4_FragmentShader(kha_internal_BytesBlob.fromBytes(bytes),"painter_colored_frag");
+	kha_Shaders.painter_image_frag = new kha_graphics4_FragmentShader(kha_internal_BytesBlob.fromBytes(bytes),"painter_image_frag");
 	var data1 = Reflect.field(kha_Shaders,"painter_colored_vertData");
 	var bytes1 = haxe_Unserializer.run(data1);
 	kha_Shaders.painter_colored_vert = new kha_graphics4_VertexShader(kha_internal_BytesBlob.fromBytes(bytes1),"painter_colored_vert");
-	var data2 = Reflect.field(kha_Shaders,"painter_image_fragData");
+	var data2 = Reflect.field(kha_Shaders,"painter_image_vertData");
 	var bytes2 = haxe_Unserializer.run(data2);
-	kha_Shaders.painter_image_frag = new kha_graphics4_FragmentShader(kha_internal_BytesBlob.fromBytes(bytes2),"painter_image_frag");
-	var data3 = Reflect.field(kha_Shaders,"painter_image_vertData");
+	kha_Shaders.painter_image_vert = new kha_graphics4_VertexShader(kha_internal_BytesBlob.fromBytes(bytes2),"painter_image_vert");
+	var data3 = Reflect.field(kha_Shaders,"painter_colored_fragData");
 	var bytes3 = haxe_Unserializer.run(data3);
-	kha_Shaders.painter_image_vert = new kha_graphics4_VertexShader(kha_internal_BytesBlob.fromBytes(bytes3),"painter_image_vert");
+	kha_Shaders.painter_colored_frag = new kha_graphics4_FragmentShader(kha_internal_BytesBlob.fromBytes(bytes3),"painter_colored_frag");
 	var data4 = Reflect.field(kha_Shaders,"painter_video_fragData");
 	var bytes4 = haxe_Unserializer.run(data4);
 	kha_Shaders.painter_video_frag = new kha_graphics4_FragmentShader(kha_internal_BytesBlob.fromBytes(bytes4),"painter_video_frag");
@@ -19436,10 +19434,10 @@ n4_NEntity.__name__ = true;
 n4_NEntity.__super__ = n4_NBasic;
 n4_NEntity.prototype = $extend(n4_NBasic.prototype,{
 	init: function() {
-		this.velocity = new kha_math_FastVector2(0,0);
-		this.maxVelocity = new kha_math_FastVector2(10000,10000);
-		this.acceleration = new kha_math_FastVector2(0,0);
-		this.drag = new kha_math_FastVector2(0,0);
+		this.velocity = new n4_math_NPoint(0,0);
+		this.maxVelocity = new n4_math_NPoint(10000,10000);
+		this.acceleration = new n4_math_NPoint(0,0);
+		this.drag = new n4_math_NPoint(0,0);
 	}
 	,update: function(dt) {
 		n4_NBasic.prototype.update.call(this,dt);
@@ -19452,17 +19450,21 @@ n4_NEntity.prototype = $extend(n4_NBasic.prototype,{
 		_g.set_angle(_g.angle + this.angularVelocity * dt);
 		this.angularVelocity += velocityDelta;
 		velocityDelta = 0.5 * (n4_math_NVelocityCalc.computeVelocity(this.velocity.x,this.acceleration.x,this.drag.x,this.maxVelocity.x,dt) - this.velocity.x);
-		this.velocity.x += velocityDelta;
+		var _g1 = this.velocity;
+		_g1.set_x(_g1.x + velocityDelta);
 		var delta = this.velocity.x * dt;
-		this.velocity.x += velocityDelta;
-		var _g1 = this;
-		_g1.set_x(_g1.x + delta);
+		var _g2 = this.velocity;
+		_g2.set_x(_g2.x + velocityDelta);
+		var _g3 = this;
+		_g3.set_x(_g3.x + delta);
 		velocityDelta = 0.5 * (n4_math_NVelocityCalc.computeVelocity(this.velocity.y,this.acceleration.y,this.drag.y,this.maxVelocity.y,dt) - this.velocity.y);
-		this.velocity.y += velocityDelta;
+		var _g4 = this.velocity;
+		_g4.set_y(_g4.y + velocityDelta);
 		delta = this.velocity.y * dt;
-		this.velocity.y += velocityDelta;
-		var _g2 = this;
-		_g2.set_y(_g2.y + delta);
+		var _g5 = this.velocity;
+		_g5.set_y(_g5.y + velocityDelta);
+		var _g6 = this;
+		_g6.set_y(_g6.y + delta);
 	}
 	,render: function(f) {
 		n4_NBasic.prototype.render.call(this,f);
@@ -19489,7 +19491,9 @@ n4_NEntity.prototype = $extend(n4_NBasic.prototype,{
 		return this.height = Value;
 	}
 	,get_momentum: function() {
-		return this.mass * this.velocity.get_length();
+		var tmp = this.mass;
+		var _this = this.velocity.toVector();
+		return tmp * Math.sqrt(_this.x * _this.x + _this.y * _this.y);
 	}
 	,__class__: n4_NEntity
 });
@@ -19576,14 +19580,14 @@ n4_entities_NSprite.prototype = $extend(n4_NEntity.prototype,{
 	}
 	,makeGraphic: function(Width,Height,GraphicColor) {
 		var g = n4_pooling_NGraphicPool.get(Width,Height,GraphicColor);
+		this.set_width(Width);
+		this.set_height(Height);
 		if(g == null) {
 			if(GraphicColor == null) {
 				GraphicColor = kha__$Color_Color_$Impl_$.White;
 			} else {
 				GraphicColor = GraphicColor;
 			}
-			this.set_width(Width);
-			this.set_height(Height);
 			this.set_graphic(kha_Image.createRenderTarget(Width,Height));
 			this.graphic.get_g2().begin();
 			this.graphic.get_g2().set_color(GraphicColor);
@@ -19593,6 +19597,14 @@ n4_entities_NSprite.prototype = $extend(n4_NEntity.prototype,{
 		} else {
 			this.set_graphic(g);
 		}
+		return this;
+	}
+	,renderGraphic: function(Width,Height,render) {
+		this.set_width(Width);
+		this.set_height(Height);
+		var target = kha_Image.createRenderTarget(Width,Height);
+		render(target);
+		this.set_graphic(target);
 		return this;
 	}
 	,set_graphic: function(Value) {
@@ -19648,7 +19660,7 @@ n4_effects_particles_NSquareParticleEmitter.velocitySpread = function(Radius,XOf
 	var theta = Math.random() * Math.PI * 2;
 	var u = Math.random() + Math.random();
 	var r = Radius * (u > 1?2 - u:u);
-	return new kha_math_FastVector2(Math.cos(theta) * r + XOffset,Math.sin(theta) * r + YOffset);
+	return new n4_math_NPoint(Math.cos(theta) * r + XOffset,Math.sin(theta) * r + YOffset);
 };
 n4_effects_particles_NSquareParticleEmitter.__super__ = n4_group_NTypedGroup;
 n4_effects_particles_NSquareParticleEmitter.prototype = $extend(n4_group_NTypedGroup.prototype,{
@@ -19660,8 +19672,8 @@ n4_effects_particles_NSquareParticleEmitter.prototype = $extend(n4_group_NTypedG
 		Y -= Size / 2;
 		var particle = new n4_effects_particles_NParticle(X,Y,PColor,Life);
 		particle.makeGraphic(Size,Size,PColor);
-		particle.velocity.x = Velocity.x;
-		particle.velocity.y = Velocity.y;
+		particle.velocity.set_x(Velocity.x);
+		particle.velocity.set_y(Velocity.y);
 		this.add(particle);
 	}
 	,__class__: n4_effects_particles_NSquareParticleEmitter
@@ -19743,6 +19755,938 @@ n4_input_keyboard_NKeyboard.prototype = {
 	}
 	,__class__: n4_input_keyboard_NKeyboard
 };
+var n4_math_NAngle = function() { };
+$hxClasses["n4.math.NAngle"] = n4_math_NAngle;
+n4_math_NAngle.__name__ = true;
+n4_math_NAngle.wrapAngle = function(angle) {
+	if(angle > 180) {
+		angle = n4_math_NAngle.wrapAngle(angle - 360);
+	} else if(angle < -180) {
+		angle = n4_math_NAngle.wrapAngle(angle + 360);
+	}
+	return angle;
+};
+n4_math_NAngle.asDegrees = function(radians) {
+	return radians * (180 / Math.PI);
+};
+n4_math_NAngle.asRadians = function(degrees) {
+	return degrees * (Math.PI / 180);
+};
+n4_math_NAngle.getCartesianCoords = function(Radius,Angle,point) {
+	var p = point;
+	if(point == null) {
+		p = new n4_math_NPoint();
+	}
+	p.set_x(Radius * Math.cos(Angle * (Math.PI / 180)));
+	p.set_y(Radius * Math.sin(Angle * (Math.PI / 180)));
+	return p;
+};
+n4_math_NAngle.getPolarCoords = function(X,Y,point) {
+	var p = point;
+	if(point == null) {
+		p = new n4_math_NPoint();
+	}
+	p.set_x(Math.sqrt(X * X + Y * Y));
+	p.set_y(Math.atan2(Y,X) * (180 / Math.PI));
+	return p;
+};
+n4_math_NAngle.get_TO_DEG = function() {
+	return 180 / Math.PI;
+};
+n4_math_NAngle.get_TO_RAD = function() {
+	return Math.PI / 180;
+};
+var n4_math_NMath = function() { };
+$hxClasses["n4.math.NMath"] = n4_math_NMath;
+n4_math_NMath.__name__ = true;
+n4_math_NMath.roundDecimal = function(Value,Precision) {
+	var mult = 1;
+	var _g1 = 0;
+	while(_g1 < Precision) {
+		++_g1;
+		mult *= 10;
+	}
+	return Math.round(Value * mult) / mult;
+};
+n4_math_NMath.bound = function(Value,Min,Max) {
+	var lowerBound = Min != null && Value < Min?Min:Value;
+	if(Max != null && lowerBound > Max) {
+		return Max;
+	} else {
+		return lowerBound;
+	}
+};
+n4_math_NMath.lerp = function(a,b,ratio) {
+	return a + ratio * (b - a);
+};
+n4_math_NMath.inBounds = function(Value,Min,Max) {
+	if(Min == null || Value >= Min) {
+		if(Max != null) {
+			return Value <= Max;
+		} else {
+			return true;
+		}
+	} else {
+		return false;
+	}
+};
+n4_math_NMath.isOdd = function(n) {
+	return ((n | 0) & 1) != 0;
+};
+n4_math_NMath.isEven = function(n) {
+	return ((n | 0) & 1) == 0;
+};
+n4_math_NMath.numericComparison = function(a,b) {
+	if(b > a) {
+		return -1;
+	} else if(a > b) {
+		return 1;
+	}
+	return 0;
+};
+n4_math_NMath.pointInCoordinates = function(pointX,pointY,rectX,rectY,rectWidth,rectHeight) {
+	if(pointX >= rectX && pointX <= rectX + rectWidth) {
+		if(pointY >= rectY && pointY <= rectY + rectHeight) {
+			return true;
+		}
+	}
+	return false;
+};
+n4_math_NMath.pointInNRect = function(pointX,pointY,rect) {
+	if(pointX >= rect.x && pointX <= rect.x + rect.width && pointY >= rect.y) {
+		return pointY <= rect.y + rect.height;
+	} else {
+		return false;
+	}
+};
+n4_math_NMath.pointInRectangle = function(pointX,pointY,rect) {
+	if(pointX >= rect.x && pointX <= rect.x + rect.width && pointY >= rect.y) {
+		return pointY <= rect.y + rect.height;
+	} else {
+		return false;
+	}
+};
+n4_math_NMath.maxAdd = function(value,amount,max,min) {
+	if(min == null) {
+		min = 0;
+	}
+	value += amount;
+	if(value > max) {
+		value = max;
+	} else if(value <= min) {
+		value = min;
+	}
+	return value;
+};
+n4_math_NMath.wrap = function(value,min,max) {
+	var range = max - min + 1;
+	if(value < min) {
+		value += range * ((min - value) / range + 1 | 0);
+	}
+	return min + (value - min) % range;
+};
+n4_math_NMath.remapToRange = function(value,start1,stop1,start2,stop2) {
+	return start2 + (value - start1) * ((stop2 - start2) / (stop1 - start1));
+};
+n4_math_NMath.dotProduct = function(ax,ay,bx,by) {
+	return ax * bx + ay * by;
+};
+n4_math_NMath.vectorLength = function(dx,dy) {
+	return Math.sqrt(dx * dx + dy * dy);
+};
+n4_math_NMath.getDecimals = function(n) {
+	var helperArray = (n == null?"null":"" + n).split(".");
+	var decimals = 0;
+	if(helperArray.length > 1) {
+		decimals = helperArray[1].length;
+	}
+	return decimals;
+};
+n4_math_NMath.equal = function(aValueA,aValueB,aDiff) {
+	if(aDiff == null) {
+		aDiff = 0.0000001;
+	}
+	return Math.abs(aValueA - aValueB) <= aDiff;
+};
+n4_math_NMath.signOf = function(n) {
+	if(n < 0) {
+		return -1;
+	} else {
+		return 1;
+	}
+};
+n4_math_NMath.sameSign = function(a,b) {
+	return (a < 0?-1:1) == (b < 0?-1:1);
+};
+n4_math_NMath.fastSin = function(n) {
+	n *= 0.3183098862;
+	if(n > 1) {
+		n -= Math.ceil(n) >> 1 << 1;
+	} else if(n < -1) {
+		n += Math.ceil(-n) >> 1 << 1;
+	}
+	if(n > 0) {
+		return n * (3.1 + n * (0.5 + n * (-7.2 + n * 3.6)));
+	} else {
+		return n * (3.1 - n * (0.5 + n * (7.2 + n * 3.6)));
+	}
+};
+n4_math_NMath.fastCos = function(n) {
+	var n1 = n + 1.570796327;
+	n1 *= 0.3183098862;
+	if(n1 > 1) {
+		n1 -= Math.ceil(n1) >> 1 << 1;
+	} else if(n1 < -1) {
+		n1 += Math.ceil(-n1) >> 1 << 1;
+	}
+	if(n1 > 0) {
+		return n1 * (3.1 + n1 * (0.5 + n1 * (-7.2 + n1 * 3.6)));
+	} else {
+		return n1 * (3.1 - n1 * (0.5 + n1 * (7.2 + n1 * 3.6)));
+	}
+};
+n4_math_NMath.sinh = function(n) {
+	return (Math.exp(n) - Math.exp(-n)) / 2;
+};
+n4_math_NMath.maxInt = function(a,b) {
+	if(a > b) {
+		return a;
+	} else {
+		return b;
+	}
+};
+n4_math_NMath.minInt = function(a,b) {
+	if(a > b) {
+		return b;
+	} else {
+		return a;
+	}
+};
+n4_math_NMath.absInt = function(n) {
+	if(n > 0) {
+		return n;
+	} else {
+		return -n;
+	}
+};
+var n4_math_NPoint = function(X,Y) {
+	if(Y == null) {
+		Y = 0;
+	}
+	if(X == null) {
+		X = 0;
+	}
+	this.y = 0;
+	this.x = 0;
+	this.set(X,Y);
+};
+$hxClasses["n4.math.NPoint"] = n4_math_NPoint;
+n4_math_NPoint.__name__ = true;
+n4_math_NPoint.prototype = {
+	toVector: function() {
+		return new n4_math_NVector(this.x,this.y);
+	}
+	,toFastVector2: function() {
+		return new kha_math_FastVector2(this.x,this.y);
+	}
+	,set: function(X,Y) {
+		if(Y == null) {
+			Y = 0;
+		}
+		if(X == null) {
+			X = 0;
+		}
+		this.set_x(X);
+		this.set_y(Y);
+		return this;
+	}
+	,add: function(X,Y) {
+		if(Y == null) {
+			Y = 0;
+		}
+		if(X == null) {
+			X = 0;
+		}
+		var _g = this;
+		_g.set_x(_g.x + X);
+		var _g1 = this;
+		_g1.set_y(_g1.y + Y);
+		return this;
+	}
+	,addPoint: function(point) {
+		var _g = this;
+		_g.set_x(_g.x + point.x);
+		var _g1 = this;
+		_g1.set_y(_g1.y + point.y);
+		return this;
+	}
+	,subtract: function(X,Y) {
+		if(Y == null) {
+			Y = 0;
+		}
+		if(X == null) {
+			X = 0;
+		}
+		var _g = this;
+		_g.set_x(_g.x - X);
+		var _g1 = this;
+		_g1.set_y(_g1.y - Y);
+		return this;
+	}
+	,subtractPoint: function(point) {
+		var _g = this;
+		_g.set_x(_g.x - point.x);
+		var _g1 = this;
+		_g1.set_y(_g1.y - point.y);
+		return this;
+	}
+	,scale: function(k) {
+		var _g = this;
+		_g.set_x(_g.x * k);
+		var _g1 = this;
+		_g1.set_y(_g1.y * k);
+		return this;
+	}
+	,copyFrom: function(point) {
+		this.set_x(point.x);
+		this.set_y(point.y);
+		return this;
+	}
+	,copyTo: function(point) {
+		point.set_x(this.x);
+		point.set_y(this.y);
+		return point;
+	}
+	,inCoords: function(RectX,RectY,RectWidth,RectHeight) {
+		return n4_math_NMath.pointInCoordinates(this.x,this.y,RectX,RectY,RectWidth,RectHeight);
+	}
+	,inRect: function(Rect) {
+		return n4_math_NMath.pointInNRect(this.x,this.y,Rect);
+	}
+	,distanceTo: function(point) {
+		var dx = this.x - point.x;
+		var dy = this.y - point.y;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+	,floor: function() {
+		this.set_x(Math.floor(this.x));
+		this.set_y(Math.floor(this.y));
+		return this;
+	}
+	,ceil: function() {
+		this.set_x(Math.ceil(this.x));
+		this.set_y(Math.ceil(this.y));
+		return this;
+	}
+	,round: function() {
+		this.set_x(Math.round(this.x));
+		this.set_y(Math.round(this.y));
+		return this;
+	}
+	,rotate: function(Pivot,Angle) {
+		var radians = Angle * (Math.PI / 180);
+		var n = radians;
+		n = radians * 0.3183098862;
+		if(n > 1) {
+			n -= Math.ceil(n) >> 1 << 1;
+		} else if(n < -1) {
+			n += Math.ceil(-n) >> 1 << 1;
+		}
+		var sin = n > 0?n * (3.1 + n * (0.5 + n * (-7.2 + n * 3.6))):n * (3.1 - n * (0.5 + n * (7.2 + n * 3.6)));
+		var n1 = radians + 1.570796327;
+		n1 *= 0.3183098862;
+		if(n1 > 1) {
+			n1 -= Math.ceil(n1) >> 1 << 1;
+		} else if(n1 < -1) {
+			n1 += Math.ceil(-n1) >> 1 << 1;
+		}
+		var cos = n1 > 0?n1 * (3.1 + n1 * (0.5 + n1 * (-7.2 + n1 * 3.6))):n1 * (3.1 - n1 * (0.5 + n1 * (7.2 + n1 * 3.6)));
+		var dx = this.x - Pivot.x;
+		var dy = this.y - Pivot.y;
+		this.set_x(cos * dx - sin * dy + Pivot.x);
+		this.set_y(sin * dx + cos * dy + Pivot.y);
+		return this;
+	}
+	,angleBetween: function(point) {
+		var x = point.x - this.x;
+		var y = point.y - this.y;
+		var angle = 0;
+		if(x != 0 || y != 0) {
+			var c1 = Math.PI * 0.25;
+			var c2 = 3 * c1;
+			var ay = y < 0?-y:y;
+			if(x >= 0) {
+				angle = c1 - c1 * ((x - ay) / (x + ay));
+			} else {
+				angle = c2 - c1 * ((x + ay) / (ay - x));
+			}
+			angle = (y < 0?-angle:angle) * (180 / Math.PI);
+			if(angle > 90) {
+				angle -= 270;
+			} else {
+				angle += 90;
+			}
+		}
+		return angle;
+	}
+	,equals: function(point) {
+		return Math.abs(this.x - point.x) <= 0.0000001 && Math.abs(this.y - point.y) <= 0.0000001;
+	}
+	,set_x: function(Value) {
+		return this.x = Value;
+	}
+	,set_y: function(Value) {
+		return this.y = Value;
+	}
+	,__class__: n4_math_NPoint
+};
+var n4_math_NCallbackPoint = function(setXCallback,setYCallback,setXYCallback) {
+	n4_math_NPoint.call(this);
+	this._setXCallback = setXCallback;
+	this._setYCallback = setXYCallback;
+	this._setXYCallback = setXYCallback;
+	if(this._setXCallback != null) {
+		if(this._setYCallback == null) {
+			this._setYCallback = setXCallback;
+		}
+		if(this._setXYCallback == null) {
+			this._setXYCallback = setXCallback;
+		}
+	}
+};
+$hxClasses["n4.math.NCallbackPoint"] = n4_math_NCallbackPoint;
+n4_math_NCallbackPoint.__name__ = true;
+n4_math_NCallbackPoint.__super__ = n4_math_NPoint;
+n4_math_NCallbackPoint.prototype = $extend(n4_math_NPoint.prototype,{
+	set: function(X,Y) {
+		if(Y == null) {
+			Y = 0;
+		}
+		if(X == null) {
+			X = 0;
+		}
+		n4_math_NPoint.prototype.set.call(this,X,Y);
+		if(this._setXYCallback != null) {
+			this._setXYCallback(this);
+		}
+		return this;
+	}
+	,set_x: function(Value) {
+		n4_math_NPoint.prototype.set_x.call(this,Value);
+		if(this._setXCallback != null) {
+			this._setXCallback(this);
+		}
+		return Value;
+	}
+	,set_y: function(Value) {
+		n4_math_NPoint.prototype.set_y.call(this,Value);
+		if(this._setYCallback != null) {
+			this._setYCallback(this);
+		}
+		return Value;
+	}
+	,__class__: n4_math_NCallbackPoint
+});
+var n4_math_NRect = function(X,Y,Width,Height) {
+	if(Height == null) {
+		Height = 0;
+	}
+	if(Width == null) {
+		Width = 0;
+	}
+	if(Y == null) {
+		Y = 0;
+	}
+	if(X == null) {
+		X = 0;
+	}
+	this.x = X;
+	this.y = Y;
+	this.width = Width;
+	this.height = Height;
+};
+$hxClasses["n4.math.NRect"] = n4_math_NRect;
+n4_math_NRect.__name__ = true;
+n4_math_NRect.prototype = {
+	setSize: function(Width,Height) {
+		this.width = Width;
+		this.height = Height;
+		return this;
+	}
+	,setPosition: function(x,y) {
+		this.x = x;
+		this.y = y;
+		return this;
+	}
+	,set: function(X,Y,Width,Height) {
+		if(Height == null) {
+			Height = 0;
+		}
+		if(Width == null) {
+			Width = 0;
+		}
+		if(Y == null) {
+			Y = 0;
+		}
+		if(X == null) {
+			X = 0;
+		}
+		this.x = X;
+		this.y = Y;
+		this.width = Width;
+		this.height = Height;
+		return this;
+	}
+	,copyFrom: function(Rect) {
+		this.x = Rect.x;
+		this.y = Rect.y;
+		this.width = Rect.width;
+		this.height = Rect.height;
+		return this;
+	}
+	,copyTo: function(Rect) {
+		Rect.x = this.x;
+		Rect.y = this.y;
+		Rect.width = this.width;
+		Rect.height = this.height;
+		return Rect;
+	}
+	,overlaps: function(Rect) {
+		return Rect.x + Rect.width > this.x && Rect.x < this.x + this.width && Rect.y + Rect.height > this.y && Rect.y < this.y + this.height;
+	}
+	,containsPoint: function(Point) {
+		return n4_math_NMath.pointInNRect(Point.x,Point.y,this);
+	}
+	,union: function(Rect) {
+		var minX = Math.min(this.x,Rect.x);
+		var minY = Math.min(this.y,Rect.y);
+		var maxX = Math.max(this.x + this.width,Rect.x + Rect.width);
+		var maxY = Math.max(this.y + this.height,Rect.y + Rect.height);
+		this.x = minX;
+		this.y = minY;
+		this.width = maxX - minX;
+		this.height = maxY - minY;
+		return this;
+	}
+	,floor: function() {
+		this.x = Math.floor(this.x);
+		this.y = Math.floor(this.y);
+		this.width = Math.floor(this.width);
+		this.height = Math.floor(this.height);
+		return this;
+	}
+	,ceil: function() {
+		this.x = Math.ceil(this.x);
+		this.y = Math.ceil(this.y);
+		this.width = Math.ceil(this.width);
+		this.height = Math.ceil(this.height);
+		return this;
+	}
+	,round: function() {
+		this.x = Math.round(this.x);
+		this.y = Math.round(this.y);
+		this.width = Math.round(this.width);
+		this.height = Math.round(this.height);
+		return this;
+	}
+	,fromTwoPoints: function(Point1,Point2) {
+		var minX = Math.min(Point1.x,Point2.x);
+		var minY = Math.min(Point1.y,Point2.y);
+		var maxX = Math.max(Point1.x,Point2.x);
+		var maxY = Math.max(Point1.y,Point2.y);
+		this.x = minX;
+		this.y = minY;
+		this.width = maxX - minX;
+		this.height = maxY - minY;
+		return this;
+	}
+	,unionWithPoint: function(Point) {
+		var minX = Math.min(this.x,Point.x);
+		var minY = Math.min(this.y,Point.y);
+		var maxX = Math.max(this.x + this.width,Point.x);
+		var maxY = Math.max(this.y + this.height,Point.y);
+		this.x = minX;
+		this.y = minY;
+		this.width = maxX - minX;
+		this.height = maxY - minY;
+		return this;
+	}
+	,offset: function(dx,dy) {
+		this.x += dx;
+		this.y += dy;
+		return this;
+	}
+	,destroy: function() {
+	}
+	,equals: function(rect) {
+		return Math.abs(this.x - rect.x) <= 0.0000001 && Math.abs(this.y - rect.y) <= 0.0000001 && Math.abs(this.width - rect.width) <= 0.0000001 && Math.abs(this.height - rect.height) <= 0.0000001;
+	}
+	,intersection: function(rect,result) {
+		if(result == null) {
+			result = new n4_math_NRect();
+		}
+		var x0 = this.x < rect.x?rect.x:this.x;
+		var x1 = this.x + this.width > rect.x + rect.width?rect.x + rect.width:this.x + this.width;
+		if(x1 <= x0) {
+			return result;
+		}
+		var y0 = this.y < rect.y?rect.y:this.y;
+		var y1 = this.y + this.height > rect.y + rect.height?rect.y + rect.height:this.y + this.height;
+		if(y1 <= y0) {
+			return result;
+		}
+		result.x = x0;
+		result.y = y0;
+		result.width = x1 - x0;
+		result.height = y1 - y0;
+		return result;
+	}
+	,get_left: function() {
+		return this.x;
+	}
+	,set_left: function(Value) {
+		this.width -= Value - this.x;
+		return this.x = Value;
+	}
+	,get_right: function() {
+		return this.x + this.width;
+	}
+	,set_right: function(Value) {
+		this.width = Value - this.x;
+		return Value;
+	}
+	,get_top: function() {
+		return this.y;
+	}
+	,set_top: function(Value) {
+		this.height -= Value - this.y;
+		return this.y = Value;
+	}
+	,get_bottom: function() {
+		return this.y + this.height;
+	}
+	,set_bottom: function(Value) {
+		this.height = Value - this.y;
+		return Value;
+	}
+	,get_isEmpty: function() {
+		if(this.width != 0) {
+			return this.height == 0;
+		} else {
+			return true;
+		}
+	}
+	,__class__: n4_math_NRect
+};
+var n4_math_NVector = function(X,Y) {
+	n4_math_NPoint.call(this,X,Y);
+};
+$hxClasses["n4.math.NVector"] = n4_math_NVector;
+n4_math_NVector.__name__ = true;
+n4_math_NVector.__super__ = n4_math_NPoint;
+n4_math_NVector.prototype = $extend(n4_math_NPoint.prototype,{
+	set: function(X,Y) {
+		if(Y == null) {
+			Y = 0;
+		}
+		if(X == null) {
+			X = 0;
+		}
+		this.set_x(X);
+		this.set_y(Y);
+		return this;
+	}
+	,scale: function(k) {
+		n4_math_NPoint.prototype.scale.call(this,k);
+		return this;
+	}
+	,scaleNew: function(k) {
+		return this.clone().scale(k);
+	}
+	,addNew: function(v) {
+		var nv = this.clone();
+		nv.addPoint(v);
+		return nv;
+	}
+	,subtractNew: function(v) {
+		var nv = this.clone();
+		nv.subtractPoint(v);
+		return nv;
+	}
+	,dotProduct: function(v) {
+		return this.x * v.x + this.y * v.y;
+	}
+	,dotProdWithNormalizing: function(v) {
+		var normalized = v.clone(n4_math_NVector._vector1).normalize();
+		return this.x * normalized.x + this.y * normalized.y;
+	}
+	,isPerpendicular: function(v) {
+		return Math.abs(this.x * v.x + this.y * v.y) < 9.9999999999999984e-015;
+	}
+	,crossProductLength: function(v) {
+		return this.x * v.y - this.y * v.x;
+	}
+	,isParallel: function(v) {
+		return Math.abs(this.x * v.y - this.y * v.x) < 9.9999999999999984e-015;
+	}
+	,isZero: function() {
+		if(Math.abs(this.x) < 0.0000001) {
+			return Math.abs(this.y) < 0.0000001;
+		} else {
+			return false;
+		}
+	}
+	,zero: function() {
+		this.set_x(this.set_y(0));
+		return this;
+	}
+	,normalize: function() {
+		if(Math.abs(this.x) < 0.0000001 && Math.abs(this.y) < 0.0000001) {
+			return this;
+		}
+		return this.scale(1 / Math.sqrt(this.x * this.x + this.y * this.y));
+	}
+	,isNormalized: function() {
+		return Math.abs(this.x * this.x + this.y * this.y - 1) < 9.9999999999999984e-015;
+	}
+	,rotateByRadians: function(rads) {
+		var s = Math.sin(rads);
+		var c = Math.cos(rads);
+		var tempX = this.x;
+		this.set_x(tempX * c - this.y * s);
+		this.set_y(tempX * s + this.y * c);
+		return this;
+	}
+	,rotateByDegrees: function(degs) {
+		var rads = degs * (Math.PI / 180);
+		var s = Math.sin(rads);
+		var c = Math.cos(rads);
+		var tempX = this.x;
+		this.set_x(tempX * c - this.y * s);
+		this.set_y(tempX * s + this.y * c);
+		return this;
+	}
+	,rotateWithTrig: function(sin,cos) {
+		var tempX = this.x;
+		this.set_x(tempX * cos - this.y * sin);
+		this.set_y(tempX * sin + this.y * cos);
+		return this;
+	}
+	,rightNormal: function(vec) {
+		if(vec == null) {
+			vec = new n4_math_NVector();
+		}
+		vec.set(-this.y,this.x);
+		return vec;
+	}
+	,leftNormal: function(vec) {
+		if(vec == null) {
+			vec = new n4_math_NVector();
+		}
+		vec.set(this.y,-this.x);
+		return vec;
+	}
+	,negate: function() {
+		var _g = this;
+		_g.set_x(_g.x * -1);
+		var _g1 = this;
+		_g1.set_y(_g1.y * -1);
+		return this;
+	}
+	,negateNew: function() {
+		var _this = this.clone();
+		_this.set_x(_this.x * -1);
+		_this.set_y(_this.y * -1);
+		return _this;
+	}
+	,projectTo: function(v,proj) {
+		var dp = this.x * v.x + this.y * v.y;
+		var lenSq = v.x * v.x + v.y * v.y;
+		if(proj == null) {
+			proj = new n4_math_NVector();
+		}
+		return proj.set(dp * v.x / lenSq,dp * v.y / lenSq);
+	}
+	,projectToNormalized: function(v,proj) {
+		var dp = this.x * v.x + this.y * v.y;
+		if(proj == null) {
+			proj = new n4_math_NVector();
+		}
+		return proj.set(dp * v.x,dp * v.y);
+	}
+	,perpProduct: function(v) {
+		return this.y * v.x + -this.x * v.y;
+	}
+	,ratio: function(a,b,v) {
+		if(Math.abs(this.x * v.y - this.y * v.x) < 9.9999999999999984e-015) {
+			return NaN;
+		}
+		if(this.x * this.x + this.y * this.y < 9.9999999999999984e-015 || v.x * v.x + v.y * v.y < 9.9999999999999984e-015) {
+			return NaN;
+		}
+		n4_math_NVector._vector1 = b.clone(n4_math_NVector._vector1);
+		n4_math_NVector._vector1.subtractPoint(a);
+		var _this = n4_math_NVector._vector1;
+		return (_this.y * v.x + -_this.x * v.y) / (this.y * v.x + -this.x * v.y);
+	}
+	,findIntersection: function(a,b,v,intersection) {
+		var t = this.ratio(a,b,v);
+		if(intersection == null) {
+			intersection = new n4_math_NVector();
+		}
+		if(isNaN(t)) {
+			return intersection.set(NaN,NaN);
+		}
+		return intersection.set(a.x + t * this.x,a.y + t * this.y);
+	}
+	,findIntersectionInBounds: function(a,b,v,intersection) {
+		if(intersection == null) {
+			intersection = new n4_math_NVector();
+		}
+		var t1 = this.ratio(a,b,v);
+		var t2 = v.ratio(b,a,this);
+		if(!isNaN(t1) && !isNaN(t2) && t1 > 0 && t1 <= 1 && t2 > 0 && t2 <= 1) {
+			return intersection.set(a.x + t1 * this.x,a.y + t1 * this.y);
+		}
+		return intersection.set(NaN,NaN);
+	}
+	,truncate: function(max) {
+		var l = Math.min(max,Math.sqrt(this.x * this.x + this.y * this.y));
+		if(!(Math.abs(this.x) < 0.0000001 && Math.abs(this.y) < 0.0000001)) {
+			var a = this.get_radians();
+			this.set_x(l * Math.cos(a));
+			this.set_y(l * Math.sin(a));
+		}
+		return this;
+	}
+	,radiansBetween: function(v) {
+		return Math.acos((this.x * v.x + this.y * v.y) / (Math.sqrt(this.x * this.x + this.y * this.y) * Math.sqrt(v.x * v.x + v.y * v.y)));
+	}
+	,degreesBetween: function(v) {
+		return Math.acos((this.x * v.x + this.y * v.y) / (Math.sqrt(this.x * this.x + this.y * this.y) * Math.sqrt(v.x * v.x + v.y * v.y))) * (180 / Math.PI);
+	}
+	,sign: function(a,b) {
+		var signFl = (a.x - this.x) * (b.y - this.y) - (a.y - this.y) * (b.x - this.x);
+		if(signFl == 0) {
+			return 0;
+		}
+		return Math.round(signFl / Math.abs(signFl));
+	}
+	,dist: function(v) {
+		var dx = v.x - this.x;
+		var dy = v.y - this.y;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+	,distSquared: function(v) {
+		var dx = v.x - this.x;
+		var dy = v.y - this.y;
+		return dx * dx + dy * dy;
+	}
+	,bounce: function(normal,bounceCoeff) {
+		if(bounceCoeff == null) {
+			bounceCoeff = 1;
+		}
+		var d = (1 + bounceCoeff) * (this.x * normal.x + this.y * normal.y);
+		var _g = this;
+		_g.set_x(_g.x - d * normal.x);
+		var _g1 = this;
+		_g1.set_y(_g1.y - d * normal.y);
+		return this;
+	}
+	,bounceWithFriction: function(normal,bounceCoeff,friction) {
+		if(friction == null) {
+			friction = 0;
+		}
+		if(bounceCoeff == null) {
+			bounceCoeff = 1;
+		}
+		var p1 = this.projectToNormalized(normal.rightNormal(n4_math_NVector._vector3),n4_math_NVector._vector1);
+		var p2 = this.projectToNormalized(normal,n4_math_NVector._vector2);
+		var bounceX = -p2.x;
+		var bounceY = -p2.y;
+		var frictionX = p1.x;
+		var frictionY = p1.y;
+		this.set_x(bounceX * bounceCoeff + frictionX * friction);
+		this.set_y(bounceY * bounceCoeff + frictionY * friction);
+		return this;
+	}
+	,isValid: function() {
+		if(!isNaN(this.x) && !isNaN(this.y) && isFinite(this.x)) {
+			return isFinite(this.y);
+		} else {
+			return false;
+		}
+	}
+	,clone: function(vec) {
+		if(vec == null) {
+			vec = new n4_math_NVector();
+		}
+		vec.set_x(this.x);
+		vec.set_y(this.y);
+		return vec;
+	}
+	,get_dx: function() {
+		if(Math.abs(this.x) < 0.0000001 && Math.abs(this.y) < 0.0000001) {
+			return 0;
+		}
+		return this.x / Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+	,get_dy: function() {
+		if(Math.abs(this.x) < 0.0000001 && Math.abs(this.y) < 0.0000001) {
+			return 0;
+		}
+		return this.y / Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+	,get_length: function() {
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+	,set_length: function(l) {
+		if(!(Math.abs(this.x) < 0.0000001 && Math.abs(this.y) < 0.0000001)) {
+			var a = this.get_radians();
+			this.set_x(l * Math.cos(a));
+			this.set_y(l * Math.sin(a));
+		}
+		return l;
+	}
+	,get_lengthSquared: function() {
+		return this.x * this.x + this.y * this.y;
+	}
+	,get_degrees: function() {
+		return this.get_radians() * (180 / Math.PI);
+	}
+	,set_degrees: function(degs) {
+		var rads = degs * (Math.PI / 180);
+		var len = Math.sqrt(this.x * this.x + this.y * this.y);
+		this.set_x(len * Math.cos(rads));
+		this.set_y(len * Math.sin(rads));
+		return degs;
+	}
+	,get_radians: function() {
+		if(Math.abs(this.x) < 0.0000001 && Math.abs(this.y) < 0.0000001) {
+			return 0;
+		}
+		return Math.atan2(this.y,this.x);
+	}
+	,set_radians: function(rads) {
+		var len = Math.sqrt(this.x * this.x + this.y * this.y);
+		this.set_x(len * Math.cos(rads));
+		this.set_y(len * Math.sin(rads));
+		return rads;
+	}
+	,get_rx: function() {
+		return -this.y;
+	}
+	,get_ry: function() {
+		return this.x;
+	}
+	,get_lx: function() {
+		return this.y;
+	}
+	,get_ly: function() {
+		return -this.x;
+	}
+	,__class__: n4_math_NVector
+});
 var n4_math_NVelocityCalc = function() { };
 $hxClasses["n4.math.NVelocityCalc"] = n4_math_NVelocityCalc;
 n4_math_NVelocityCalc.__name__ = true;
@@ -19843,8 +20787,8 @@ var sprites_Player = function(X,Y) {
 	this.speed = 50;
 	n4_entities_NSprite.call(this,X,Y);
 	this.makeGraphic(20,20,kha__$Color_Color_$Impl_$.Blue);
-	this.drag = new kha_math_FastVector2(280,280);
-	this.maxVelocity = new kha_math_FastVector2(120,120);
+	this.drag = new n4_math_NPoint(280,280);
+	this.maxVelocity = new n4_math_NPoint(120,120);
 };
 $hxClasses["sprites.Player"] = sprites_Player;
 sprites_Player.__name__ = true;
@@ -19867,20 +20811,31 @@ sprites_Player.prototype = $extend(n4_entities_NSprite.prototype,{
 			_right = false;
 			_left = false;
 		}
+		var mA = 0;
 		if(_left || _right || _up || _down) {
 			if(_up) {
-				this.velocity.y -= this.speed;
-			}
-			if(_down) {
-				this.velocity.y += this.speed;
-			}
-			if(_left) {
-				this.velocity.x -= this.speed;
-			}
-			if(_right) {
-				this.velocity.x += this.speed;
+				mA = -90;
+				if(_left) {
+					mA = -135;
+				}
+				if(_right) {
+					mA += 45;
+				}
+			} else if(_down) {
+				mA = 90;
+				if(_left) {
+					mA = 135;
+				}
+				if(_right) {
+					mA -= 45;
+				}
+			} else if(_left) {
+				mA = 180;
+			} else if(_right) {
+				mA = 0;
 			}
 		}
+		this.velocity.addPoint(new n4_math_NPoint(this.speed,0).rotate(new n4_math_NPoint(0,0),mA));
 	}
 	,update: function(dt) {
 		this.movement();
@@ -19955,10 +20910,10 @@ kha_Scheduler.timeWarpSaveTime = 1.0;
 kha_Scheduler.DIF_COUNT = 3;
 kha_Scheduler.maxframetime = 0.5;
 kha_Scheduler.startTime = 0;
-kha_Shaders.painter_colored_fragData = "s190:I3ZlcnNpb24gMTAwCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdmFyeWluZyB2ZWM0IGZyYWdtZW50Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBnbF9GcmFnRGF0YVswXSA9IGZyYWdtZW50Q29sb3I7Cn0KCg";
-kha_Shaders.painter_colored_vertData = "s334:I3ZlcnNpb24gMTAwCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmF0dHJpYnV0ZSB2ZWMzIHZlcnRleFBvc2l0aW9uOwp2YXJ5aW5nIHZlYzQgZnJhZ21lbnRDb2xvcjsKYXR0cmlidXRlIHZlYzQgdmVydGV4Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBnbF9Qb3NpdGlvbiA9IChwcm9qZWN0aW9uTWF0cml4ICogdmVjNCh2ZXJ0ZXhQb3NpdGlvbiwgMS4wKSk7CiAgICBmcmFnbWVudENvbG9yID0gdmVydGV4Q29sb3I7Cn0KCg";
 kha_Shaders.painter_image_fragData = "s444:I3ZlcnNpb24gMTAwCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBtZWRpdW1wIHNhbXBsZXIyRCB0ZXg7Cgp2YXJ5aW5nIHZlYzIgdGV4Q29vcmQ7CnZhcnlpbmcgdmVjNCBjb2xvcjsKCnZvaWQgbWFpbigpCnsKICAgIHZlYzQgdGV4Y29sb3IgPSAodGV4dHVyZTJEKHRleCwgdGV4Q29vcmQpICogY29sb3IpOwogICAgdmVjMyBfMzIgPSB0ZXhjb2xvci54eXogKiBjb2xvci53OwogICAgdGV4Y29sb3IgPSB2ZWM0KF8zMi54LCBfMzIueSwgXzMyLnosIHRleGNvbG9yLncpOwogICAgZ2xfRnJhZ0RhdGFbMF0gPSB0ZXhjb2xvcjsKfQoK";
+kha_Shaders.painter_colored_vertData = "s334:I3ZlcnNpb24gMTAwCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmF0dHJpYnV0ZSB2ZWMzIHZlcnRleFBvc2l0aW9uOwp2YXJ5aW5nIHZlYzQgZnJhZ21lbnRDb2xvcjsKYXR0cmlidXRlIHZlYzQgdmVydGV4Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBnbF9Qb3NpdGlvbiA9IChwcm9qZWN0aW9uTWF0cml4ICogdmVjNCh2ZXJ0ZXhQb3NpdGlvbiwgMS4wKSk7CiAgICBmcmFnbWVudENvbG9yID0gdmVydGV4Q29sb3I7Cn0KCg";
 kha_Shaders.painter_image_vertData = "s418:I3ZlcnNpb24gMTAwCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmF0dHJpYnV0ZSB2ZWMzIHZlcnRleFBvc2l0aW9uOwp2YXJ5aW5nIHZlYzIgdGV4Q29vcmQ7CmF0dHJpYnV0ZSB2ZWMyIHRleFBvc2l0aW9uOwp2YXJ5aW5nIHZlYzQgY29sb3I7CmF0dHJpYnV0ZSB2ZWM0IHZlcnRleENvbG9yOwoKdm9pZCBtYWluKCkKewogICAgZ2xfUG9zaXRpb24gPSAocHJvamVjdGlvbk1hdHJpeCAqIHZlYzQodmVydGV4UG9zaXRpb24sIDEuMCkpOwogICAgdGV4Q29vcmQgPSB0ZXhQb3NpdGlvbjsKICAgIGNvbG9yID0gdmVydGV4Q29sb3I7Cn0KCg";
+kha_Shaders.painter_colored_fragData = "s190:I3ZlcnNpb24gMTAwCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdmFyeWluZyB2ZWM0IGZyYWdtZW50Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBnbF9GcmFnRGF0YVswXSA9IGZyYWdtZW50Q29sb3I7Cn0KCg";
 kha_Shaders.painter_video_fragData = "s444:I3ZlcnNpb24gMTAwCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBtZWRpdW1wIHNhbXBsZXIyRCB0ZXg7Cgp2YXJ5aW5nIHZlYzIgdGV4Q29vcmQ7CnZhcnlpbmcgdmVjNCBjb2xvcjsKCnZvaWQgbWFpbigpCnsKICAgIHZlYzQgdGV4Y29sb3IgPSAodGV4dHVyZTJEKHRleCwgdGV4Q29vcmQpICogY29sb3IpOwogICAgdmVjMyBfMzIgPSB0ZXhjb2xvci54eXogKiBjb2xvci53OwogICAgdGV4Y29sb3IgPSB2ZWM0KF8zMi54LCBfMzIueSwgXzMyLnosIHRleGNvbG9yLncpOwogICAgZ2xfRnJhZ0RhdGFbMF0gPSB0ZXhjb2xvcjsKfQoK";
 kha_Shaders.painter_text_fragData = "s340:I3ZlcnNpb24gMTAwCnByZWNpc2lvbiBtZWRpdW1wIGZsb2F0OwpwcmVjaXNpb24gaGlnaHAgaW50OwoKdW5pZm9ybSBtZWRpdW1wIHNhbXBsZXIyRCB0ZXg7Cgp2YXJ5aW5nIHZlYzQgZnJhZ21lbnRDb2xvcjsKdmFyeWluZyB2ZWMyIHRleENvb3JkOwoKdm9pZCBtYWluKCkKewogICAgZ2xfRnJhZ0RhdGFbMF0gPSB2ZWM0KGZyYWdtZW50Q29sb3IueHl6LCAodGV4dHVyZTJEKHRleCwgdGV4Q29vcmQpLnggKiBmcmFnbWVudENvbG9yLncpKTsKfQoK";
 kha_Shaders.painter_text_vertData = "s439:I3ZlcnNpb24gMTAwCgp1bmlmb3JtIG1hdDQgcHJvamVjdGlvbk1hdHJpeDsKCmF0dHJpYnV0ZSB2ZWMzIHZlcnRleFBvc2l0aW9uOwp2YXJ5aW5nIHZlYzIgdGV4Q29vcmQ7CmF0dHJpYnV0ZSB2ZWMyIHRleFBvc2l0aW9uOwp2YXJ5aW5nIHZlYzQgZnJhZ21lbnRDb2xvcjsKYXR0cmlidXRlIHZlYzQgdmVydGV4Q29sb3I7Cgp2b2lkIG1haW4oKQp7CiAgICBnbF9Qb3NpdGlvbiA9IChwcm9qZWN0aW9uTWF0cml4ICogdmVjNCh2ZXJ0ZXhQb3NpdGlvbiwgMS4wKSk7CiAgICB0ZXhDb29yZCA9IHRleFBvc2l0aW9uOwogICAgZnJhZ21lbnRDb2xvciA9IHZlcnRleENvbG9yOwp9Cgo";
@@ -20091,6 +21046,17 @@ n4_NGame.currentState = new n4_NState();
 n4_NGame.frameCount = 0;
 n4_NGame.useDoubleBuffering = true;
 n4_NGame.syncDrawUpdate = true;
+n4_math_NMath.MIN_VALUE_FLOAT = 0.0000000000000001;
+n4_math_NMath.MAX_VALUE_FLOAT = 1.79e+308;
+n4_math_NMath.MIN_VALUE_INT = -2147483647;
+n4_math_NMath.MAX_VALUE_INT = 2147483647;
+n4_math_NMath.SQUARE_ROOT_OF_TWO = 1.41421356237;
+n4_math_NMath.EPSILON = 0.0000001;
+n4_math_NVector.EPSILON = 0.0000001;
+n4_math_NVector.EPSILON_SQUARED = 9.9999999999999984e-015;
+n4_math_NVector._vector1 = new n4_math_NVector();
+n4_math_NVector._vector2 = new n4_math_NVector();
+n4_math_NVector._vector3 = new n4_math_NVector();
 n4_pooling_NGraphicPool.items = new haxe_ds_StringMap();
 Main.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
