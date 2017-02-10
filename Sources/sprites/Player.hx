@@ -25,10 +25,10 @@ class Player extends NSprite {
 		var left:Bool = false;
 		var right:Bool = false;
 
-		up = NGame.keys.getKey("UP");
-		down = NGame.keys.getKey("DOWN");
-		left = NGame.keys.getKey("LEFT");
-		right = NGame.keys.getKey("RIGHT");
+		up = NGame.keys.pressed(["UP"]);
+		down = NGame.keys.pressed(["DOWN"]);
+		left = NGame.keys.pressed(["LEFT"]);
+		right = NGame.keys.pressed(["RIGHT"]);
 
 		if (up || down || left || right)
 		{
