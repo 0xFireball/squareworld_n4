@@ -8,6 +8,7 @@ class Turret extends NSprite {
 		super(X, Y);
 
 		mass = 180;
+		angularVelocity = Math.PI / 2;
 		makeGraphic(30, 30, Color.fromValue(0xFF444444));
 	}
 }

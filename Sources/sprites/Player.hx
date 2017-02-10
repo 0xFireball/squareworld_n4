@@ -20,64 +20,67 @@ class Player extends NSprite {
 	}
 
 	private function movement() {
-		var _up:Bool = false;
-		var _down:Bool = false;
-		var _left:Bool = false;
-		var _right:Bool = false;
+		var up:Bool = false;
+		var down:Bool = false;
+		var left:Bool = false;
+		var right:Bool = false;
 
-		_up = NGame.keys.getKey("UP");
-		_down = NGame.keys.getKey("DOWN");
-		_left = NGame.keys.getKey("LEFT");
-		_right = NGame.keys.getKey("RIGHT");
+		up = NGame.keys.getKey("UP");
+		down = NGame.keys.getKey("DOWN");
+		left = NGame.keys.getKey("LEFT");
+		right = NGame.keys.getKey("RIGHT");
 
-		// Cancel double directions
-		if (_up && _down)
-			_up = _down = false;
-		if (_left && _right)
-			_left = _right = false;
-		var mA = 0; // movement angle
-		if (_left || _right || _up || _down)
+		if (up || down || left || right)
 		{
-			if (_up)
+			// Cancel double directions
+			if (up && down)
+				up = down = false;
+			if (left && right)
+				left = right = false;
+			var mA = 0; // movement angle
+			if (left || right || up || down)
 			{
-				mA = -90;
-				if (_left)
+				if (up)
 				{
-					mA -= 45;
+					mA = -90;
+					if (left)
+					{
+						mA -= 45;
+					}
+					if (right)
+					{
+						mA += 45;
+					}
 				}
-				if (_right)
+				else if (down)
 				{
-					mA += 45;
+					mA = 90;
+					if (left)
+					{
+						mA += 45;
+					}
+					if (right)
+					{
+						mA -= 45;
+					}
+				}
+				else if (left)
+				{
+					mA = 180;
+				}
+				else if (right)
+				{
+					mA = 0;
 				}
 			}
-			else if (_down)
-			{
-				mA = 90;
-				if (_left)
-				{
-					mA += 45;
-				}
-				if (_right)
-				{
-					mA -= 45;
-				}
-			}
-			else if (_left)
-			{
-				mA = 180;
-			}
-			else if (_right)
-			{
-				mA = 0;
-			}
+			var movementVel = new NPoint(speed, 0);
+			velocity.addPoint(movementVel.rotate(new NPoint(0, 0), mA));
 		}
-		var movementVel = new NPoint(speed, 0);
-		velocity.addPoint(movementVel.rotate(new NPoint(0, 0), mA));
 	}
 
 	override public function update(dt:Float) {
 		movement();
 
 		super.update(dt);
-	} 
+	}
 }
