@@ -1,7 +1,7 @@
 package sprites;
 
 import kha.Color;
-import n4.effects.particles.NSquareParticleEmitter;
+import n4.effects.particles.NParticleEmitter;
 import n4.entities.NSprite;
 import n4.NGame;
 import n4.util.NColorUtil;
@@ -16,7 +16,7 @@ class Bullet extends NSprite {
 
 	public override function update(dt:Float) {
 		Registry.PS.emitter
-			.emit(x, y, 3, NSquareParticleEmitter.velocitySpread(50),
+			.emitSquare(x, y, 3, NParticleEmitter.velocitySpread(50),
 				NColorUtil.randCol(0.7, 0, 0),
 				0.3
 			);

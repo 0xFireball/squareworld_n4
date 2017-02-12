@@ -2,7 +2,7 @@ package;
 
 import kha.Color;
 import n4.NState;
-import n4.effects.particles.NSquareParticleEmitter;
+import n4.effects.particles.NParticleEmitter;
 import n4.group.NTypedGroup;
 import n4.math.*;
 import n4.NGame;
@@ -13,7 +13,7 @@ class PlayState extends NState {
 	private var _bullets:NTypedGroup<Bullet>;
 	private var _turret:Turret;
 	public var player(default, null):Player;
-	public var emitter(default, null):NSquareParticleEmitter;
+	public var emitter(default, null):NParticleEmitter;
 
 	private var _frameCount = 0;
 	public var shotTimer:Float = 0.2;
@@ -32,7 +32,7 @@ class PlayState extends NState {
 		_bullets = new NTypedGroup<Bullet>();
 		add(_bullets);
 
-		emitter = new NSquareParticleEmitter(240);
+		emitter = new NParticleEmitter(240);
 		add(emitter);
 
 		super.create();
@@ -66,7 +66,7 @@ class PlayState extends NState {
 		p.y = (Math.random() * 0.8 + 0.1) * NGame.height;
 		for (i in 0...15) {
 			Registry.PS.emitter
-				.emit(b.x, b.y, 9, NSquareParticleEmitter.velocitySpread(100, 
+				.emitSquare(b.x, b.y, 9, NParticleEmitter.velocitySpread(100, 
 						p.velocity.x / 2,
 						p.velocity.y / 2),
 					NColorUtil.randCol(0.3, 0.3, 0.3),
@@ -75,7 +75,7 @@ class PlayState extends NState {
 		}
 		for (i in 0...9) {
 			Registry.PS.emitter
-				.emit(b.x, b.y, 9, NSquareParticleEmitter.velocitySpread(75, 
+				.emitSquare(b.x, b.y, 9, NParticleEmitter.velocitySpread(75, 
 						p.velocity.x / 2,
 						p.velocity.y / 2),
 					NColorUtil.randCol(1, 0.1, 0),
@@ -155,8 +155,8 @@ class PlayState extends NState {
 		 if (_turret.x < 0) _turret.x += NGame.width;
 		 if (_turret.y < 0) _turret.y += NGame.height;
 		 for (i in 0...19) {
-			 emitter.emit(x, y, 6,
-					NSquareParticleEmitter.velocitySpread(45, dx / 4, dy / 4),
+			 emitter.emitSquare(x, y, 6,
+					NParticleEmitter.velocitySpread(45, dx / 4, dy / 4),
 					NColorUtil.randCol(0.5, 0.5, 0.5), 0.6);
 		 }
 	 }
