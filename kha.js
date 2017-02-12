@@ -173,7 +173,7 @@ var Main = function() { };
 $hxClasses["Main"] = Main;
 Main.__name__ = true;
 Main.main = function() {
-	n4_NGame.init("shapes2",1024,768,PlayState,60);
+	n4_NGame.init("shapes2",window.innerWidth,window.innerHeight,PlayState,60);
 };
 Math.__name__ = true;
 var n4_NBasic = function() {
@@ -4011,7 +4011,7 @@ kha_SystemImpl.touchDown = function(event) {
 	kha_js_AEAudioChannel.catchUp();
 	event.stopPropagation();
 	event.preventDefault();
-	var _g = 0;
+	vai _g = 0;
 	var _g1 = event.changedTouches;
 	while(_g < _g1.length) {
 		var touch = _g1[_g];
