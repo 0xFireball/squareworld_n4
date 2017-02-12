@@ -86,21 +86,21 @@ class PlayState extends NState {
 
 	function turretFire() {
 		var bulletSp = 350;
-		// var fancy = player.velocity.length > 0;
-		var fancy = false;
+		// var fancy = player.velocity.toVector().length > 0;
+		var fancy = true;
 		if (!fancy) {
 			var dx = (_turret.x + _turret.width / 2) - (player.x + player.width / 2);
 			var dy = (_turret.y + _turret.height / 2) - (player.y + player.height / 2);
 			var m = -Math.sqrt(dx*dx + dy*dy);
 			shoot(_turret.x + _turret.width / 2, _turret.y + _turret.height / 2, dx*bulletSp/m, dy*bulletSp/m);
 		} else {
-			var px:Float = player.x;
-			var py:Float = player.y;
+			var px:Float = _turret.x - player.x;
+			var py:Float = _turret.y - player.y;
 			var vx:Float = player.velocity.x;
 			var vy:Float = player.velocity.y;
 			var m:Float = Math.sqrt(vx * vx + vy * vy);
 			var sin = m == 0 ? 0 : vy / m;
-			var cos = m == 0 ? 0 : vx / m;
+			var cos = m == 0 ? 1 : vx / m;
 			var rot = function (x:Float, y:Float) {
 				return [x * cos + y * sin, y * cos - x * sin];
 			}
@@ -108,8 +108,8 @@ class PlayState extends NState {
 			vx = vr1[0];
 			vy = vr1[1];
 			var vr2 = rot(px, py);
-			px = vr1[0];
-			py = vr1[1];
+			px = vr2[0];
+			py = vr2[1];
 
 			py = -py;
 			var adf2 = 2 * vx * px / py;
