@@ -32,7 +32,7 @@ class PlayState extends NState {
 		_bullets = new NTypedGroup<Bullet>();
 		add(_bullets);
 
-		emitter = new NParticleEmitter(240);
+		emitter = new NParticleEmitter();
 		add(emitter);
 
 		super.create();
