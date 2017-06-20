@@ -145,7 +145,7 @@ class PlayState extends NState {
 		 bullet.velocity.x = dx;
 		 bullet.velocity.y = dy;
 		 _bullets.add(bullet);
-		 var recoilVelocity = bullet.momentum.toVector().scale(-_turret.mass);
+		 var recoilVelocity = bullet.momentum.toVector().scale(-1 / _turret.mass);
 		 _turret.velocity.x += recoilVelocity.x;
 		 _turret.velocity.y += recoilVelocity.y;
 		 if (_turret.x > NGame.width) _turret.x = _turret.x % NGame.width;
