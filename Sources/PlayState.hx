@@ -5,7 +5,7 @@ import n4.NState;
 import n4.effects.particles.NParticleEmitter;
 import n4.group.NTypedGroup;
 import n4.math.*;
-import n4.NGame;
+import n4.*;
 import n4.util.NColorUtil;
 import sprites.*;
 
@@ -41,7 +41,7 @@ class PlayState extends NState {
 	override public function update(dt:Float) {
 		super.update(dt);
 
-		NGame.overlap(_bullets, player, bulletHitPlayer);
+		NG.overlap(_bullets, player, bulletHitPlayer);
 
 		if (player.x < 0) player.x = 0;
 		if (player.x > NGame.width - player.width) player.x = NGame.width - player.width;
