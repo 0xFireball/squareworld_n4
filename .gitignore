@@ -1,3 +1,8 @@
 
 /build
 /korefile.js
+
+# System specific
+.DS_Store
+Thumbs.db
+.directory
