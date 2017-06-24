@@ -1,8 +1,7 @@
 package sprites;
 
 import kha.Color;
-import kha.input.Keyboard;
-import kha.Key;
+import kha.input.KeyCode;
 import n4.entities.NSprite;
 import n4.math.NPoint;
 import n4.NG;
@@ -25,10 +24,10 @@ class Player extends NSprite {
 		var left:Bool = false;
 		var right:Bool = false;
 
-		up = NG.keys.pressed(["UP", "W"]);
-		down = NG.keys.pressed(["DOWN", "S"]);
-		left = NG.keys.pressed(["LEFT", "A"]);
-		right = NG.keys.pressed(["RIGHT", "D"]);
+		up = NG.keys.pressed([KeyCode.Up, KeyCode.W]);
+		down = NG.keys.pressed([KeyCode.Down, KeyCode.S]);
+		left = NG.keys.pressed([KeyCode.Left, KeyCode.A]);
+		right = NG.keys.pressed([KeyCode.Right, KeyCode.D]);
 
 		if (up || down || left || right)
 		{
